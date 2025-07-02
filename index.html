@@ -1,132 +1,81 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Etiqueta</title>
+  <meta charset="UTF-8">
+  <title>Impressão de Etiquetas</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background: #f0f0f0;
       padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      background: #f5f5f5;
+      text-align: center;
     }
 
-    .form-container {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      width: 340px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
+    .menu, .celular, .pc {
+      display: none;
     }
 
-    .form-container label {
-      display: block;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-
-    .form-container input {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      margin-top: 4px;
-    }
-
-    .form-container button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 20px;
+    button {
+      padding: 15px 25px;
+      margin: 10px;
+      font-size: 18px;
       background: black;
       color: white;
-      font-size: 18px;
       border: none;
       cursor: pointer;
     }
 
-    .print-area {
-      display: none;
+    input {
+      padding: 10px;
+      width: 80%;
+      margin: 10px 0;
+      font-size: 16px;
     }
 
-    .agradecimento {
+    .etiqueta {
       display: none;
     }
 
     @media print {
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      html, body {
-        width: 100mm;
-        height: 60mm;
-        visibility: hidden;
-        overflow: hidden;
-      }
-
-      .print-area {
+      body { visibility: hidden; }
+      .etiqueta {
         visibility: visible;
         position: fixed;
         top: 0;
         left: 0;
         width: 100mm;
         height: 60mm;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        page-break-after: avoid;
-        page-break-before: avoid;
-        page-break-inside: avoid;
-      }
-
-      .etiqueta {
-        width: 100%;
-        height: 100%;
         border: 3px solid black;
         padding: 6mm;
         background: white;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        font-family: Arial, sans-serif;
       }
 
       .produto {
         font-size: 32px;
         font-weight: bold;
-        text-transform: uppercase;
       }
 
       .gramagem {
         font-size: 20px;
-        margin-top: 2px;
       }
 
       .preco {
-        font-size: 60px;
-        font-weight: bold;
+        font-size: 50px;
         text-align: right;
-        border-top: 1px dashed black;
         margin-top: auto;
-        padding-top: 4px;
-        line-height: 1;
+        border-top: 1px dashed black;
       }
 
       .agradecimento {
-        display: block;
-        font-size: 16px;
+        font-size: 14px;
         text-align: center;
-        margin-top: 10px;
         font-style: italic;
-        color: #333;
       }
 
       @page {
@@ -138,70 +87,90 @@
 </head>
 <body>
 
-  <div class="form-container" id="formContainer">
-    <label>Produto:</label>
-    <input type="text" id="produto" placeholder="Ex: Arroz Tipo 1" />
-
-    <label>Gramagem:</label>
-    <input type="text" id="gramagem" placeholder="Ex: 5kg" />
-
-    <label>Valor:</label>
-    <input type="text" id="valor" placeholder="Ex: R$ 19,90" />
-
-    <button onclick="gerarEtiqueta()">Gerar e Imprimir</button>
+  <!-- Tela de escolha -->
+  <div class="menu" id="menu">
+    <h2>Escolha o modo</h2>
+    <button onclick="modoCelular()">📱 Abrir como Celular</button>
+    <button onclick="modoPC()">🖨️ Abrir como PC</button>
   </div>
 
-  <div class="print-area" id="printArea">
-    <div class="etiqueta">
-      <div class="produto" id="etqProduto">Produto</div>
-      <div class="gramagem" id="etqGramagem">Gramagem</div>
-      <div class="preco" id="etqPreco">R$ 0,00</div>
-      <div class="agradecimento">Bom Mercado agradece sua preferência!</div>
-    </div>
+  <!-- Formulário do celular -->
+  <div class="celular" id="celular">
+    <h2>Preencher Etiqueta</h2>
+    <input id="produto" placeholder="Produto">
+    <input id="gramagem" placeholder="Gramagem">
+    <input id="preco" placeholder="Preço">
+    <button onclick="enviar()">Enviar para Impressão</button>
+  </div>
+
+  <!-- Espera e imprime no PC -->
+  <div class="pc" id="pc">
+    <h2>Aguardando etiqueta do celular...</h2>
+  </div>
+
+  <!-- Etiqueta para impressão -->
+  <div class="etiqueta" id="etiqueta">
+    <div class="produto" id="etqProduto">Produto</div>
+    <div class="gramagem" id="etqGramagem">Gramagem</div>
+    <div class="preco" id="etqPreco">R$ 0,00</div>
+    <div class="agradecimento">Bom Mercado agradece sua preferência!</div>
   </div>
 
   <script>
-    function gerarEtiqueta() {
-      const produto = document.getElementById('produto').value;
-      const gramagem = document.getElementById('gramagem').value;
-      const valor = document.getElementById('valor').value;
-
-      document.getElementById('etqProduto').textContent = produto;
-      document.getElementById('etqGramagem').textContent = gramagem;
-      document.getElementById('etqPreco').textContent = valor;
-
-      document.getElementById('printArea').style.display = 'block';
-
-      setTimeout(() => {
-        window.print();
-        document.getElementById('printArea').style.display = 'none';
-      }, 300);
-    }
-
-    // Detecta se está em PC ou celular
-    function isMobile() {
-      return /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
-    }
-
-    // Se for PC, ocultar o formulário e abrir modo etiqueta
-    window.onload = function () {
-      if (!isMobile()) {
-        // PC: esconde formulário
-        document.getElementById('formContainer').style.display = 'none';
-
-        // Preenche etiqueta com valores fixos ou recebidos por outro método
-        document.getElementById('etqProduto').textContent = "PRODUTO EXEMPLO";
-        document.getElementById('etqGramagem').textContent = "1kg";
-        document.getElementById('etqPreco').textContent = "R$ 9,90";
-
-        document.getElementById('printArea').style.display = 'block';
-
-        setTimeout(() => {
-          window.print();
-        }, 500);
-      }
+    // Configuração Firebase do seu projeto
+    const firebaseConfig = {
+      databaseURL: "https://site-46fb6-default-rtdb.firebaseio.com/"
     };
-  </script>
 
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Mostrar a tela de menu
+    document.getElementById("menu").style.display = "block";
+
+    function modoCelular() {
+      document.getElementById("menu").style.display = "none";
+      document.getElementById("celular").style.display = "block";
+    }
+
+    function modoPC() {
+      document.getElementById("menu").style.display = "none";
+      document.getElementById("pc").style.display = "block";
+      document.getElementById("etiqueta").style.display = "flex";
+
+      // Escutar alterações no Firebase
+      db.ref("etiquetaAtual").on("value", snapshot => {
+        const dados = snapshot.val();
+        if (dados) {
+          document.getElementById("etqProduto").textContent = dados.produto;
+          document.getElementById("etqGramagem").textContent = dados.gramagem;
+          document.getElementById("etqPreco").textContent = dados.preco;
+          setTimeout(() => window.print(), 300);
+        }
+      });
+    }
+
+    function enviar() {
+      const produto = document.getElementById("produto").value;
+      const gramagem = document.getElementById("gramagem").value;
+      const preco = document.getElementById("preco").value;
+
+      if (produto && gramagem && preco) {
+        db.ref("etiquetaAtual").set({
+          produto,
+          gramagem,
+          preco,
+          timestamp: Date.now()
+        }).then(() => {
+          alert("Enviado com sucesso!");
+          document.getElementById("produto").value = "";
+          document.getElementById("gramagem").value = "";
+          document.getElementById("preco").value = "";
+        });
+      } else {
+        alert("Preencha todos os campos!");
+      }
+    }
+  </script>
 </body>
 </html>
