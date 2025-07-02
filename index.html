@@ -1,560 +1,207 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Bom Mercado - Avaliação</title>
-<style>
-  /* Reset básico */
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #000000, #222222);
-    color: #fff;
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-  }
-  #container {
-    background: #111;
-    border-radius: 12px;
-    max-width: 400px;
-    width: 100%;
-    padding: 20px 30px;
-    box-shadow: 0 0 15px #facc15aa;
-  }
-  h1 {
-    color: #facc15;
-    text-align: center;
-    margin-bottom: 10px;
-    font-weight: 900;
-    text-shadow: 0 0 8px #facc15;
-  }
-  p.subtitle {
-    text-align: center;
-    color: #f0db4fcc;
-    margin-bottom: 20px;
-    font-weight: 600;
-  }
-  fieldset {
-    border: none;
-    margin: 0;
-    padding: 0;
-    display: none;
-  }
-  fieldset.active {
-    display: block;
-  }
-  legend {
-    font-weight: 700;
-    margin-bottom: 10px;
-    color: #facc15;
-    text-shadow: 0 0 6px #facc15bb;
-  }
-  input[type="number"], textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: none;
-    font-size: 1rem;
-    background: #222;
-    color: #facc15;
-    box-shadow: inset 0 0 8px #facc15aa;
-    margin-bottom: 10px;
-  }
-  textarea {
-    resize: vertical;
-    min-height: 70px;
-  }
-  label {
-    display: block;
-    margin-bottom: 4px;
-    font-weight: 600;
-  }
-  button {
-    background: #facc15;
-    border: none;
-    padding: 12px 25px;
-    font-weight: 700;
-    border-radius: 30px;
-    cursor: pointer;
-    color: #000;
-    font-size: 1rem;
-    margin: 5px;
-    transition: background 0.3s ease;
-    box-shadow: 0 0 8px #facc15bb;
-  }
-  button:hover {
-    background: #d4af37;
-  }
-  #nav-buttons {
-    text-align: center;
-    margin-top: 15px;
-  }
-  button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  /* Barra de progresso */
-  #progress-bar {
-    width: 100%;
-    height: 12px;
-    background: #333;
-    border-radius: 30px;
-    overflow: hidden;
-    margin-bottom: 15px;
-  }
-  #progress {
-    height: 12px;
-    background: #facc15;
-    width: 0%;
-    transition: width 0.3s ease;
-  }
-  /* Login admin discreto */
-  #login-btn {
-    position: fixed;
-    top: 12px;
-    left: 12px;
-    font-size: 0.9rem;
-    color: #facc15aa;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    text-shadow: 0 0 3px #facc15aa;
-    user-select: none;
-    transition: color 0.3s ease;
-  }
-  #login-btn:hover {
-    color: #facc15;
-  }
-  /* Modal login */
-  #modal-login {
-    position: fixed;
-    top:0; left:0; right:0; bottom:0;
-    background: rgba(0,0,0,0.85);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-  }
-  #modal-login.active {
-    display: flex;
-  }
-  #modal-login .modal-content {
-    background: #222;
-    padding: 25px 30px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 360px;
-    box-shadow: 0 0 12px #facc15aa;
-    color: #facc15;
-    text-align: center;
-  }
-  #modal-login input[type="password"] {
-    margin-top: 15px;
-    padding: 10px 12px;
-    width: 100%;
-    font-size: 1.1rem;
-    border-radius: 8px;
-    border: none;
-    background: #111;
-    color: #facc15;
-    box-shadow: inset 0 0 8px #facc15aa;
-  }
-  #modal-login button {
-    margin-top: 15px;
-    width: 100%;
-  }
-  #error-msg {
-    margin-top: 10px;
-    color: #ff5555;
-    font-weight: 700;
-    display: none;
-  }
-  /* Painel admin */
-  #admin-panel {
-    max-width: 700px;
-    margin: 30px auto 0;
-    background: #111;
-    border-radius: 12px;
-    padding: 20px;
-    color: #facc15;
-    box-shadow: 0 0 15px #facc15bb;
-    display: none;
-  }
-  #admin-panel h2 {
-    text-align: center;
-    margin-bottom: 15px;
-    font-weight: 900;
-    font-size: 1.8rem;
-  }
-  #admin-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  #admin-table th, #admin-table td {
-    border: 1px solid #facc15bb;
-    padding: 8px 10px;
-    text-align: left;
-  }
-  #admin-table th {
-    background: #222;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <title>Etiqueta</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .form-container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 340px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .form-container label {
+      display: block;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .form-container input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 4px;
+    }
+
+    .form-container button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background: black;
+      color: white;
+      font-size: 18px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .print-area {
+      display: none;
+    }
+
+    .agradecimento {
+      display: none;
+    }
+
+    @media print {
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html, body {
+        width: 100mm;
+        height: 60mm;
+        visibility: hidden;
+        overflow: hidden;
+      }
+
+      .print-area {
+        visibility: visible;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100mm;
+        height: 60mm;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        page-break-after: avoid;
+        page-break-before: avoid;
+        page-break-inside: avoid;
+      }
+
+      .etiqueta {
+        width: 100%;
+        height: 100%;
+        border: 3px solid black;
+        padding: 6mm;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .produto {
+        font-size: 32px;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+
+      .gramagem {
+        font-size: 20px;
+        margin-top: 2px;
+      }
+
+      .preco {
+        font-size: 60px;
+        font-weight: bold;
+        text-align: right;
+        border-top: 1px dashed black;
+        margin-top: auto;
+        padding-top: 4px;
+        line-height: 1;
+      }
+
+      .agradecimento {
+        display: block;
+        font-size: 16px;
+        text-align: center;
+        margin-top: 10px;
+        font-style: italic;
+        color: #333;
+      }
+
+      @page {
+        size: 100mm 60mm;
+        margin: 0;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<button id="login-btn" title="Login administrativo">Bom Mercado</button>
+  <div class="form-container" id="formContainer">
+    <label>Produto:</label>
+    <input type="text" id="produto" placeholder="Ex: Arroz Tipo 1" />
 
-<div id="modal-login" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-  <div class="modal-content">
-    <h2 id="modalTitle">Login Administrativo</h2>
-    <input type="password" id="admin-password" placeholder="Senha..." aria-label="Senha administrativa" />
-    <button id="admin-login-btn">Entrar</button>
-    <div id="error-msg">Senha incorreta!</div>
-  </div>
-</div>
+    <label>Gramagem:</label>
+    <input type="text" id="gramagem" placeholder="Ex: 5kg" />
 
-<div id="container" role="main" aria-live="polite">
+    <label>Valor:</label>
+    <input type="text" id="valor" placeholder="Ex: R$ 19,90" />
 
-  <h1>Bom Mercado</h1>
-  <p class="subtitle">Sua opinião é muito importante para melhorarmos cada vez mais.</p>
-
-  <div id="progress-bar" aria-label="Progresso do formulário">
-    <div id="progress"></div>
+    <button onclick="gerarEtiqueta()">Gerar e Imprimir</button>
   </div>
 
-  <form id="form-avaliacao" novalidate>
-
-    <!-- Etapa 1 -->
-    <fieldset class="active" data-step="1">
-      <legend>1. Qual nota geral você dá para o Bom Mercado? (1 a 5)</legend>
-      <input type="number" id="nota-geral" name="notaGeral" min="1" max="5" required aria-required="true" />
-      <div id="explicacao-geral" style="display:none;">
-        <label for="motivo-geral">Por favor, explique o motivo da nota baixa:</label>
-        <textarea id="motivo-geral" name="motivoGeral" placeholder="Explique aqui..."></textarea>
-      </div>
-    </fieldset>
-
-    <!-- Etapa 2 -->
-    <fieldset data-step="2">
-      <legend>2. Avalie nossos funcionários (1 a 5)</legend>
-
-      <label for="nota-joao">João (Caixa):</label>
-      <input type="number" id="nota-joao" name="notaJoao" min="1" max="5" required aria-required="true" />
-      <div class="explicacao-func" id="explicacao-joao" style="display:none;">
-        <label for="motivo-joao">Por que nota baixa para o João?</label>
-        <textarea id="motivo-joao" name="motivoJoao" placeholder="Explique aqui..."></textarea>
-      </div>
-
-      <label for="nota-maria">Maria (Padaria):</label>
-      <input type="number" id="nota-maria" name="notaMaria" min="1" max="5" required aria-required="true" />
-      <div class="explicacao-func" id="explicacao-maria" style="display:none;">
-        <label for="motivo-maria">Por que nota baixa para a Maria?</label>
-        <textarea id="motivo-maria" name="motivoMaria" placeholder="Explique aqui..."></textarea>
-      </div>
-
-      <label for="nota-thais">Thais (Caixa):</label>
-      <input type="number" id="nota-thais" name="notaThais" min="1" max="5" required aria-required="true" />
-      <div class="explicacao-func" id="explicacao-thais" style="display:none;">
-        <label for="motivo-thais">Por que nota baixa para a Thais?</label>
-        <textarea id="motivo-thais" name="motivoThais" placeholder="Explique aqui..."></textarea>
-      </div>
-
-      <label for="nota-eduarda">Maria Eduarda (Padaria):</label>
-      <input type="number" id="nota-eduarda" name="notaEduarda" min="1" max="5" required aria-required="true" />
-      <div class="explicacao-func" id="explicacao-eduarda" style="display:none;">
-        <label for="motivo-eduarda">Por que nota baixa para a Maria Eduarda?</label>
-        <textarea id="motivo-eduarda" name="motivoEduarda" placeholder="Explique aqui..."></textarea>
-      </div>
-
-      <label for="nota-renata">Renata (Dona):</label>
-      <input type="number" id="nota-renata" name="notaRenata" min="1" max="5" required aria-required="true" />
-      <div class="explicacao-func" id="explicacao-renata" style="display:none;">
-        <label for="motivo-renata">Por que nota baixa para a Renata?</label>
-        <textarea id="motivo-renata" name="motivoRenata" placeholder="Explique aqui..."></textarea>
-      </div>
-
-      <label for="nota-toni">Toni (Dono):</label>
-      <input type="number" id="nota-toni" name="notaToni" min="1" max="5" required aria-required="true" />
-      <div class="explicacao-func" id="explicacao-toni" style="display:none;">
-        <label for="motivo-toni">Por que nota baixa para o Toni?</label>
-        <textarea id="motivo-toni" name="motivoToni" placeholder="Explique aqui..."></textarea>
-      </div>
-    </fieldset>
-
-    <!-- Etapa 3 -->
-    <fieldset data-step="3">
-      <legend>3. Comentários gerais sobre o mercado (atendimento, limpeza, organização etc.)</legend>
-      <textarea id="comentarios-gerais" name="comentariosGerais" placeholder="Escreva aqui..." required aria-required="true"></textarea>
-    </fieldset>
-
-    <!-- Etapa 4 -->
-    <fieldset data-step="4">
-      <legend>4. Produtos que gostaria que tivessem no Bom Mercado</legend>
-      <textarea id="produtos-desejados" name="produtosDesejados" placeholder="Liste aqui..." required aria-required="true"></textarea>
-    </fieldset>
-
-    <!-- Etapa 5 -->
-    <fieldset data-step="5">
-      <legend>5. O que podemos melhorar para tornar o Bom Mercado ainda melhor?</legend>
-      <textarea id="melhorias" name="melhorias" placeholder="Conte pra gente..." required aria-required="true"></textarea>
-    </fieldset>
-
-    <!-- Etapa final -->
-    <fieldset data-step="6" style="text-align:center;">
-      <h2>Obrigado pela sua avaliação! 🙏</h2>
-      <p>Sua opinião nos ajuda a crescer e melhorar o Bom Mercado.</p>
-      <button type="button" id="btn-nova-avaliacao" style="margin-top:20px;">Fazer outra avaliação</button>
-    </fieldset>
-
-    <div id="nav-buttons" aria-label="Navegação do formulário">
-      <button type="button" id="btn-voltar" disabled>Voltar</button>
-      <button type="button" id="btn-proximo">Próximo</button>
-      <button type="submit" id="btn-enviar" style="display:none;">Enviar</button>
+  <div class="print-area" id="printArea">
+    <div class="etiqueta">
+      <div class="produto" id="etqProduto">Produto</div>
+      <div class="gramagem" id="etqGramagem">Gramagem</div>
+      <div class="preco" id="etqPreco">R$ 0,00</div>
+      <div class="agradecimento">Bom Mercado agradece sua preferência!</div>
     </div>
-  </form>
-</div>
+  </div>
 
-<!-- Painel admin -->
-<div id="admin-panel" aria-live="polite">
-  <h2>Painel Administrativo</h2>
-  <table id="admin-table" aria-label="Tabela de avaliações">
-    <thead>
-      <tr>
-        <th>Data</th>
-        <th>Nota Geral</th>
-        <th>Comentário</th>
-      </tr>
-    </thead>
-    <tbody id="admin-tbody"></tbody>
-  </table>
-</div>
+  <script>
+    function gerarEtiqueta() {
+      const produto = document.getElementById('produto').value;
+      const gramagem = document.getElementById('gramagem').value;
+      const valor = document.getElementById('valor').value;
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
+      document.getElementById('etqProduto').textContent = produto;
+      document.getElementById('etqGramagem').textContent = gramagem;
+      document.getElementById('etqPreco').textContent = valor;
 
-<script>
-  // Config Firebase
-  const firebaseConfig = {
-    databaseURL: "https://site-46fb6-default-rtdb.firebaseio.com/"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+      document.getElementById('printArea').style.display = 'block';
 
-  // Controle das etapas do formulário
-  const steps = Array.from(document.querySelectorAll('fieldset'));
-  const btnVoltar = document.getElementById('btn-voltar');
-  const btnProximo = document.getElementById('btn-proximo');
-  const btnEnviar = document.getElementById('btn-enviar');
-  const btnNovaAvaliacao = document.getElementById('btn-nova-avaliacao');
-  const progress = document.getElementById('progress');
-
-  let currentStep = 0;
-
-  function showStep(index) {
-    steps.forEach((step, i) => {
-      step.classList.toggle('active', i === index);
-    });
-    btnVoltar.disabled = index === 0;
-    btnProximo.style.display = (index === steps.length - 2) ? 'none' : 'inline-block';
-    btnEnviar.style.display = (index === steps.length - 2) ? 'inline-block' : 'none';
-    progress.style.width = ((index) / (steps.length - 1)) * 100 + '%';
-  }
-
-  function validateStep(index) {
-    const step = steps[index];
-    const inputs = Array.from(step.querySelectorAll('input, textarea'));
-    for (const input of inputs) {
-      if (input.hasAttribute('required') && !input.value.trim()) {
-        alert('Por favor, preencha o campo: ' + (input.previousElementSibling ? input.previousElementSibling.innerText : input.name));
-        input.focus();
-        return false;
-      }
-      if (input.type === "number") {
-        const val = Number(input.value);
-        if (val < Number(input.min) || val > Number(input.max)) {
-          alert(`Valor inválido para o campo: ${input.previousElementSibling ? input.previousElementSibling.innerText : input.name}`);
-          input.focus();
-          return false;
-        }
-      }
+      setTimeout(() => {
+        window.print();
+        document.getElementById('printArea').style.display = 'none';
+      }, 300);
     }
-    // Validação extra para notas baixas com explicação
-    if (index === 0) {
-      const notaGeral = Number(document.getElementById('nota-geral').value);
-      const motivoGeral = document.getElementById('motivo-geral');
-      if (notaGeral <= 2 && !motivoGeral.value.trim()) {
-        alert('Por favor, explique o motivo da nota baixa na avaliação geral.');
-        motivoGeral.focus();
-        return false;
-      }
+
+    // Detecta se está em PC ou celular
+    function isMobile() {
+      return /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
     }
-    if (index === 1) {
-      // Validar explicação para notas baixas dos funcionários
-      const funcionarios = ['joao', 'maria', 'thais', 'eduarda', 'renata', 'toni'];
-      for (const f of funcionarios) {
-        const nota = Number(document.getElementById('nota-' + f).value);
-        const motivo = document.getElementById('motivo-' + f);
-        if (nota <= 2 && !motivo.value.trim()) {
-          alert(`Por favor, explique o motivo da nota baixa para ${f.charAt(0).toUpperCase() + f.slice(1)}.`);
-          motivo.focus();
-          return false;
-        }
+
+    // Se for PC, ocultar o formulário e abrir modo etiqueta
+    window.onload = function () {
+      if (!isMobile()) {
+        // PC: esconde formulário
+        document.getElementById('formContainer').style.display = 'none';
+
+        // Preenche etiqueta com valores fixos ou recebidos por outro método
+        document.getElementById('etqProduto').textContent = "PRODUTO EXEMPLO";
+        document.getElementById('etqGramagem').textContent = "1kg";
+        document.getElementById('etqPreco').textContent = "R$ 9,90";
+
+        document.getElementById('printArea').style.display = 'block';
+
+        setTimeout(() => {
+          window.print();
+        }, 500);
       }
-    }
-    return true;
-  }
-
-  btnProximo.addEventListener('click', () => {
-    if (!validateStep(currentStep)) return;
-    currentStep++;
-    showStep(currentStep);
-  });
-
-  btnVoltar.addEventListener('click', () => {
-    if (currentStep === 0) return;
-    currentStep--;
-    showStep(currentStep);
-  });
-
-  btnNovaAvaliacao.addEventListener('click', () => {
-    document.getElementById('form-avaliacao').reset();
-    currentStep = 0;
-    showStep(currentStep);
-  });
-
-  // Mostrar/ocultar explicação para notas baixas (geral)
-  document.getElementById('nota-geral').addEventListener('input', e => {
-    const val = Number(e.target.value);
-    const container = document.getElementById('explicacao-geral');
-    container.style.display = (val > 0 && val <= 2) ? 'block' : 'none';
-    if (val > 2) document.getElementById('motivo-geral').value = '';
-  });
-
-  // Mostrar/ocultar explicações para notas baixas (funcionários)
-  const funcionarios = ['joao', 'maria', 'thais', 'eduarda', 'renata', 'toni'];
-  funcionarios.forEach(f => {
-    const input = document.getElementById('nota-' + f);
-    const contExp = document.getElementById('explicacao-' + f);
-    input.addEventListener('input', e => {
-      const val = Number(e.target.value);
-      if (val > 0 && val <= 2) {
-        contExp.style.display = 'block';
-      } else {
-        contExp.style.display = 'none';
-        document.getElementById('motivo-' + f).value = '';
-      }
-    });
-  });
-
-  // Enviar dados para Firebase
-  document.getElementById('form-avaliacao').addEventListener('submit', e => {
-    e.preventDefault();
-
-    if (!validateStep(currentStep)) return;
-
-    // Montar objeto para salvar
-    const dados = {
-      timestamp: new Date().toISOString(),
-      notaGeral: Number(document.getElementById('nota-geral').value),
-      motivoGeral: document.getElementById('motivo-geral').value.trim(),
-      funcionarios: {},
-      comentariosGerais: document.getElementById('comentarios-gerais').value.trim(),
-      produtosDesejados: document.getElementById('produtos-desejados').value.trim(),
-      melhorias: document.getElementById('melhorias').value.trim()
     };
-
-    funcionarios.forEach(f => {
-      dados.funcionarios[f] = {
-        nota: Number(document.getElementById('nota-' + f).value),
-        motivo: document.getElementById('motivo-' + f).value.trim()
-      };
-    });
-
-    // Salvar no Firebase
-    db.ref('avaliacoes').push(dados)
-      .then(() => {
-        alert('Avaliação enviada com sucesso! Muito obrigado!');
-        currentStep++;
-        showStep(currentStep);
-        document.getElementById('form-avaliacao').reset();
-      })
-      .catch(err => {
-        alert('Erro ao enviar avaliação. Tente novamente.');
-        console.error(err);
-      });
-  });
-
-  // Login admin modal e painel
-  const loginBtn = document.getElementById('login-btn');
-  const modalLogin = document.getElementById('modal-login');
-  const adminLoginBtn = document.getElementById('admin-login-btn');
-  const adminPasswordInput = document.getElementById('admin-password');
-  const errorMsg = document.getElementById('error-msg');
-  const adminPanel = document.getElementById('admin-panel');
-  const adminTbody = document.getElementById('admin-tbody');
-
-  loginBtn.addEventListener('click', () => {
-    modalLogin.classList.add('active');
-    errorMsg.style.display = 'none';
-    adminPasswordInput.value = '';
-    adminPasswordInput.focus();
-  });
-
-  adminLoginBtn.addEventListener('click', () => {
-    const senha = adminPasswordInput.value.trim();
-    const senhaCorreta = 'bommercado123'; // Troque a senha aqui
-
-    if (senha === senhaCorreta) {
-      modalLogin.classList.remove('active');
-      adminPanel.style.display = 'block';
-      carregarAvaliacoes();
-    } else {
-      errorMsg.style.display = 'block';
-      adminPasswordInput.focus();
-    }
-  });
-
-  modalLogin.addEventListener('click', e => {
-    if (e.target === modalLogin) modalLogin.classList.remove('active');
-  });
-
-  function carregarAvaliacoes() {
-    adminTbody.innerHTML = '<tr><td colspan="3">Carregando...</td></tr>';
-    db.ref('avaliacoes').once('value')
-      .then(snapshot => {
-        const data = snapshot.val();
-        if (!data) {
-          adminTbody.innerHTML = '<tr><td colspan="3">Nenhuma avaliação registrada.</td></tr>';
-          return;
-        }
-        let rows = '';
-        Object.values(data).forEach(av => {
-          rows += `
-            <tr>
-              <td>${new Date(av.timestamp).toLocaleString()}</td>
-              <td>${av.notaGeral}</td>
-              <td>${av.comentariosGerais ? av.comentariosGerais.substring(0, 50) + '...' : '-'}</td>
-            </tr>
-          `;
-        });
-        adminTbody.innerHTML = rows;
-      })
-      .catch(() => {
-        adminTbody.innerHTML = '<tr><td colspan="3">Erro ao carregar avaliações.</td></tr>';
-      });
-  }
-
-  // Inicializa o formulário na primeira etapa
-  showStep(currentStep);
-</script>
+  </script>
 
 </body>
 </html>
