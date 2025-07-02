@@ -241,56 +241,59 @@
   <div id="conteudo-admin" class="bg-black bg-opacity-70 rounded-xl p-6 shadow-lg"></div>
 </div>
 
-<!-- Scripts -->
 <script>
-  // Firebase setup
+  // Configuração Firebase - Atualize se necessário
   const firebaseConfig = {
     databaseURL: "https://site-46fb6-default-rtdb.firebaseio.com/"
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // Controle de passos do formulário
+  // Variáveis de navegação do formulário
   const steps = document.querySelectorAll('.step');
   const btnVoltar = document.getElementById('btn-voltar');
   const btnProximo = document.getElementById('btn-proximo');
   const btnEnviar = document.getElementById('btn-enviar');
   const btnNovaAvaliacao = document.getElementById('btn-nova-avaliacao');
   const barraProgresso = document.getElementById('barra-progresso');
-
   let currentStep = 0;
 
+  // Função para atualizar barra de progresso
   function updateProgressBar() {
     const percent = (currentStep / (steps.length - 1)) * 100;
     barraProgresso.style.width = percent + '%';
     barraProgresso.parentElement.setAttribute('aria-valuenow', percent.toFixed(0));
   }
 
+  // Mostrar etapa atual e esconder as outras
   function mostrarPasso(index) {
     steps.forEach((step, i) => {
-      step.style.display = i === index ? 'block' : 'none';
+      step.style.display = (i === index) ? 'block' : 'none';
     });
-    btnVoltar.disabled = index === 0;
+    btnVoltar.disabled = (index === 0);
     btnProximo.style.display = (index === steps.length - 2) ? 'none' : 'inline-block';
     btnEnviar.style.display = (index === steps.length - 2) ? 'inline-block' : 'none';
     updateProgressBar();
   }
 
+  // Validação e lógica para avançar etapa
   btnProximo.addEventListener('click', () => {
-    // valida o campo obrigatório do passo atual
     const stepAtual = steps[currentStep];
     const inputsObrigatorios = stepAtual.querySelectorAll('[required]');
     for (const input of inputsObrigatorios) {
       if (!input.value) {
         input.focus();
+        alert('Por favor, preencha este campo.');
         return;
       }
     }
-    // check se nota baixa, mostrar textarea explicacao
+
+    // Mostrar textarea explicação para nota baixa no mercado
     if (currentStep === 0) {
       const notaMercado = Number(document.getElementById('nota-mercado').value);
       const expContainer = document.querySelector('.explanation-container');
       expContainer.style.display = (notaMercado <= 2) ? 'block' : 'none';
+
       if (notaMercado <= 2) {
         const explicacao = document.getElementById('explicacao-nota-mercado').value.trim();
         if (!explicacao) {
@@ -300,7 +303,8 @@
         }
       }
     }
-    // para avaliação dos funcionários, verifica notas baixas e mostra explicação
+
+    // Mostrar explicação para notas baixas dos funcionários
     if (currentStep === 1) {
       const funcs = ['joao', 'maria', 'thais', 'eduarda', 'renata', 'toni'];
       for (const f of funcs) {
@@ -331,150 +335,137 @@
     currentStep = 0;
     mostrarPasso(currentStep);
     document.getElementById('form-avaliacao').reset();
-    // esconder todas explicações
-    document.querySelector('.explanation-container').style.display = 'none';
-    document.querySelectorAll('.explicacao-funcionario').forEach(e => e.style.display = 'none');
-    document.getElementById('painel-admin').classList.add('hidden');
   });
 
+  // Inicializa mostrando o primeiro passo
   mostrarPasso(currentStep);
 
-  // Enviar dados para o Firebase
-  document.getElementById('form-avaliacao').addEventListener('submit', e => {
-    e.preventDefault();
+  // Exibir / esconder explicações em tempo real (para nota baixa)
+  document.getElementById('nota-mercado').addEventListener('input', (e) => {
+    const val = Number(e.target.value);
+    const expContainer = document.querySelector('.explanation-container');
+    if (val <= 2 && val >= 1) {
+      expContainer.style.display = 'block';
+    } else {
+      expContainer.style.display = 'none';
+      document.getElementById('explicacao-nota-mercado').value = '';
+    }
+  });
 
-    const dados = {
-      notaMercado: Number(document.getElementById('nota-mercado').value),
-      explicacaoNotaMercado: document.getElementById('explicacao-nota-mercado').value.trim() || null,
-      funcionarios: {
-        joao: Number(document.getElementById('nota-joao').value),
-        explicacaoJoao: document.getElementById('explicacao-joao').value.trim() || null,
-        maria: Number(document.getElementById('nota-maria').value),
-        explicacaoMaria: document.getElementById('explicacao-maria').value.trim() || null,
-        thais: Number(document.getElementById('nota-thais').value),
-        explicacaoThais: document.getElementById('explicacao-thais').value.trim() || null,
-        eduarda: Number(document.getElementById('nota-eduarda').value),
-        explicacaoEduarda: document.getElementById('explicacao-eduarda').value.trim() || null,
-        renata: Number(document.getElementById('nota-renata').value),
-        explicacaoRenata: document.getElementById('explicacao-renata').value.trim() || null,
-        toni: Number(document.getElementById('nota-toni').value),
-        explicacaoToni: document.getElementById('explicacao-toni').value.trim() || null,
-      },
-      comentarioGeral: document.getElementById('comentario').value.trim(),
-      produtosDesejados: document.getElementById('produtos-desejados').value.trim(),
-      sugestoesMelhoria: document.getElementById('sugestoes-melhoria').value.trim(),
-      dataHora: new Date().toISOString()
-    };
-
-    // Salvar no Firebase
-    db.ref('avaliacoes').push(dados).then(() => {
-      currentStep++;
-      mostrarPasso(currentStep);
-      // resetar form e esconder explicações
-      document.getElementById('form-avaliacao').reset();
-      document.querySelector('.explanation-container').style.display = 'none';
-      document.querySelectorAll('.explicacao-funcionario').forEach(e => e.style.display = 'none');
-    }).catch(() => {
-      alert('Erro ao enviar avaliação, tente novamente.');
+  const funcs = ['joao', 'maria', 'thais', 'eduarda', 'renata', 'toni'];
+  funcs.forEach(f => {
+    const notaInput = document.getElementById('nota-' + f);
+    notaInput.addEventListener('input', e => {
+      const val = Number(e.target.value);
+      const explicacaoElem = document.getElementById('explicacao-' + f);
+      const contExp = explicacaoElem.parentElement;
+      if (val <= 2 && val >= 1) {
+        contExp.style.display = 'block';
+      } else {
+        contExp.style.display = 'none';
+        explicacaoElem.value = '';
+      }
     });
   });
 
-  // Login admin disfarçado
+  // Envio dos dados para o Firebase
+  document.getElementById('form-avaliacao').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    // Monta o objeto de avaliação
+    const data = {
+      timestamp: new Date().toISOString(),
+      notaMercado: Number(document.getElementById('nota-mercado').value),
+      explicacaoNotaMercado: document.getElementById('explicacao-nota-mercado').value.trim(),
+      funcionarios: {},
+      comentario: document.getElementById('comentario').value.trim(),
+      produtosDesejados: document.getElementById('produtos-desejados').value.trim(),
+      sugestoesMelhoria: document.getElementById('sugestoes-melhoria').value.trim()
+    };
+
+    funcs.forEach(f => {
+      data.funcionarios[f] = {
+        nota: Number(document.getElementById('nota-' + f).value),
+        explicacao: document.getElementById('explicacao-' + f).value.trim()
+      };
+    });
+
+    // Salva no Firebase com um id único por timestamp
+    const novaAvaliacaoRef = db.ref('avaliacoes').push();
+    novaAvaliacaoRef.set(data)
+      .then(() => {
+        alert('Avaliação enviada com sucesso! Obrigado.');
+        currentStep++;
+        mostrarPasso(currentStep);
+        document.getElementById('form-avaliacao').reset();
+      })
+      .catch(error => {
+        alert('Erro ao enviar avaliação. Tente novamente.');
+        console.error(error);
+      });
+  });
+
+  // BOTÃO LOGIN ADMIN
   const botaoLogin = document.getElementById('botao-login');
   const modalLogin = document.getElementById('modal-login');
   const btnLoginAdmin = document.getElementById('btn-login-admin');
-  const senhaInput = document.getElementById('senha-admin');
+  const inputSenhaAdmin = document.getElementById('senha-admin');
   const loginError = document.getElementById('login-error');
   const painelAdmin = document.getElementById('painel-admin');
   const conteudoAdmin = document.getElementById('conteudo-admin');
 
   botaoLogin.addEventListener('click', () => {
     modalLogin.classList.add('active');
-    senhaInput.value = '';
     loginError.style.display = 'none';
-    senhaInput.focus();
+    inputSenhaAdmin.value = '';
+    inputSenhaAdmin.focus();
   });
 
   btnLoginAdmin.addEventListener('click', () => {
-    if (senhaInput.value === 'admin123') {
+    const senha = inputSenhaAdmin.value.trim();
+    // Defina sua senha admin aqui:
+    const senhaCorreta = "bommercado123";
+
+    if (senha === senhaCorreta) {
       modalLogin.classList.remove('active');
+      painelAdmin.style.display = 'block';
       carregarPainelAdmin();
-      painelAdmin.classList.remove('hidden');
-      window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
     } else {
       loginError.style.display = 'block';
+      inputSenhaAdmin.focus();
     }
   });
 
-  // Carregar painel administrativo
+  // Fechar modal ao clicar fora do conteúdo
+  modalLogin.addEventListener('click', (e) => {
+    if (e.target === modalLogin) {
+      modalLogin.classList.remove('active');
+    }
+  });
+
+  // Função para carregar painel admin - Exibe as avaliações em tabela simples
   function carregarPainelAdmin() {
     db.ref('avaliacoes').once('value', snapshot => {
       const avaliacoes = snapshot.val();
       if (!avaliacoes) {
-        conteudoAdmin.innerHTML = '<p>Nenhuma avaliação encontrada.</p>';
+        conteudoAdmin.innerHTML = '<p>Nenhuma avaliação registrada ainda.</p>';
         return;
       }
 
-      // Calcula média geral
-      let somaNotasMercado = 0;
-      let totalAvaliacoes = 0;
-
-      const funcionarios = {
-        joao: [],
-        maria: [],
-        thais: [],
-        eduarda: [],
-        renata: [],
-        toni: []
-      };
-
-      const produtosSugeridos = [];
-      const melhoriasSugeridas = [];
-
+      let html = '<table class="w-full text-left border-collapse border border-yellow-400">';
+      html += '<thead><tr><th class="border border-yellow-400 p-2">Data</th><th class="border border-yellow-400 p-2">Nota Mercado</th><th class="border border-yellow-400 p-2">Comentário</th></tr></thead><tbody>';
       for (const key in avaliacoes) {
         const a = avaliacoes[key];
-        somaNotasMercado += a.notaMercado;
-        totalAvaliacoes++;
-
-        // Acumular notas dos funcionários
-        for (const f in funcionarios) {
-          if (a.funcionarios[f]) funcionarios[f].push(a.funcionarios[f]);
-        }
-
-        // Produtos e melhorias
-        if (a.produtosDesejados && a.produtosDesejados.length > 0) produtosSugeridos.push(a.produtosDesejados);
-        if (a.sugestoesMelhoria && a.sugestoesMelhoria.length > 0) melhoriasSugeridas.push(a.sugestoesMelhoria);
+        html += `<tr>
+          <td class="border border-yellow-400 p-2">${new Date(a.timestamp).toLocaleString()}</td>
+          <td class="border border-yellow-400 p-2">${a.notaMercado}</td>
+          <td class="border border-yellow-400 p-2">${a.comentario ? a.comentario.substring(0, 50) + '...' : '-'}</td>
+        </tr>`;
       }
-
-      const mediaMercado = (somaNotasMercado / totalAvaliacoes).toFixed(2);
-
-      // Calcular média dos funcionários
-      let html = `<p class="mb-4 text-yellow-400 font-semibold text-lg">Média geral do mercado: <span class="text-white">${mediaMercado}</span> (${totalAvaliacoes} avaliações)</p>`;
-
-      html += '<h3 class="text-yellow-400 font-bold mb-2 text-xl">Ranking dos Funcionários:</h3><ul class="mb-6">';
-      for (const f in funcionarios) {
-        const notas = funcionarios[f];
-        const media = notas.length > 0 ? (notas.reduce((a,b) => a+b, 0)/notas.length).toFixed(2) : 'Sem avaliações';
-        html += `<li><strong>${f.charAt(0).toUpperCase() + f.slice(1)}</strong>: <span class="text-white">${media}</span> estrelas</li>`;
-      }
-      html += '</ul>';
-
-      html += '<h3 class="text-yellow-400 font-bold mb-2 text-xl">Produtos mais sugeridos:</h3><ul class="list-disc pl-6 mb-6">';
-      for (const p of produtosSugeridos) {
-        html += `<li>${p}</li>`;
-      }
-      html += '</ul>';
-
-      html += '<h3 class="text-yellow-400 font-bold mb-2 text-xl">Sugestões de melhoria:</h3><ul class="list-disc pl-6 mb-6">';
-      for (const m of melhoriasSugeridas) {
-        html += `<li>${m}</li>`;
-      }
-      html += '</ul>';
-
+      html += '</tbody></table>';
       conteudoAdmin.innerHTML = html;
     });
   }
 </script>
-
 </body>
 </html>
