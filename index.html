@@ -61,7 +61,8 @@
       font-size: 1rem;
       margin-top: 0.3rem;
       margin-bottom: 1rem;
-      color: #000;
+      color: #facc15;
+      background-color: #000;
       outline-offset: 2px;
       outline-color: #facc15;
     }
@@ -260,7 +261,7 @@
   let currentStep = 0;
 
   function updateProgressBar() {
-    const percent = ((currentStep) / (steps.length - 1)) * 100;
+    const percent = (currentStep / (steps.length - 1)) * 100;
     barraProgresso.style.width = percent + '%';
     barraProgresso.parentElement.setAttribute('aria-valuenow', percent.toFixed(0));
   }
