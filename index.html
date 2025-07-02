@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bom Mercado - Avaliação</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+      color: #fff;
+      min-height: 100vh;
+      margin: 0;
+      padding-bottom: 4rem;
+    }
+    .progress-bar {
+      background: #333;
+      border-radius: 9999px;
+      overflow: hidden;
+      height: 12px;
+      margin-bottom: 1rem;
+    }
+    .progress-bar > div {
+      height: 12px;
+      background: #facc15; /* amarelo */
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+    /* Modal background */
+    .modal-bg {
+      background: rgba(0,0,0,0.85);
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .modal-bg.active {
+      display: flex;
+    }
+    /* Modal container */
+    .modal-content {
+      background: #111;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px #facc15aa;
+      width: 90%;
+      max-width: 400px;
+      color: #eee;
+      text-align: center;
+    }
+    input, textarea {
+      border-radius: 8px;
+      border: none;
+      padding: 0.5rem 1rem;
+      width: 100%;
+      font-size: 1rem;
+      margin-top: 0.3rem;
+      margin-bottom: 1rem;
+      color: #000;
+      outline-offset: 2px;
+      outline-color: #facc15;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    button {
+      background: #facc15;
+      color: #000;
+      font-weight: 700;
+      padding: 0.7rem 1.5rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      border: none;
+    }
+    button:hover {
+      background: #d4af37;
+    }
+    /* Disfarçado botão de login */
+    #botao-login {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-size: 0.9rem;
+      color: #facc15;
+      cursor: pointer;
+      user-select: none;
+      z-index: 10000;
+      font-weight: 600;
+      background: transparent;
+      border: none;
+      transition: color 0.3s ease;
+    }
+    #botao-login:hover {
+      color: #fff;
+    }
+    /* Responsividade */
+    @media (max-width: 500px) {
+      .modal-content {
+        max-width: 95%;
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Botão de login disfarçado -->
+<button id="botao-login" aria-label="Login admin">Bom Mercado</button>
+
+<!-- Modal de login -->
+<div id="modal-login" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-content">
+    <h2 id="modal-title" class="text-2xl mb-4" style="color:#facc15;">Login Administrativo</h2>
+    <input type="password" id="senha-admin" placeholder="Digite a senha..." aria-label="Senha administrativa" />
+    <button id="btn-login-admin">Entrar</button>
+    <p id="login-error" style="color:#ff5555; margin-top: 0.5rem; display:none;">Senha incorreta!</p>
+  </div>
+</div>
+
+<div class="max-w-xl mx-auto px-4 py-8">
+  <h1 class="text-yellow-400 text-4xl font-extrabold mb-4 text-center drop-shadow-lg">Avalie o <span style="color:#fff;">Bom Mercado</span> ⭐</h1>
+  <p class="text-center text-yellow-300 mb-8 px-2">
+    Sua opinião é essencial para melhorarmos cada vez mais o nosso mercado. Avalie passo a passo e, se der uma nota baixa, conte pra gente o motivo para que possamos evoluir juntos!
+  </p>
+
+  <!-- Barra de progresso -->
+  <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <div id="barra-progresso"></div>
+  </div>
+
+  <!-- Formulário por etapas -->
+  <form id="form-avaliacao" novalidate>
+
+    <!-- Etapa 1 - Nota Geral -->
+    <fieldset class="step" aria-live="polite" aria-label="Nota geral do mercado">
+      <legend class="text-lg font-semibold text-yellow-400 mb-2">1. De 1 a 5, qual nota você dá para o Bom Mercado?</legend>
+      <input type="number" id="nota-mercado" name="notaMercado" min="1" max="5" required aria-required="true" />
+      <div class="explanation-container" style="display:none;">
+        <label for="explicacao-nota-mercado" class="block text-sm mt-2 text-yellow-300">Por favor, nos conte o motivo dessa nota baixa:</label>
+        <textarea id="explicacao-nota-mercado" name="explicacaoNotaMercado" rows="3" placeholder="Explique aqui..."></textarea>
+      </div>
+    </fieldset>
+
+    <!-- Etapa 2 - Avaliação dos Funcionários -->
+    <fieldset class="step" aria-live="polite" aria-label="Avaliação dos funcionários" style="display:none;">
+      <legend class="text-lg font-semibold text-yellow-400 mb-2">2. Avalie nossos funcionários de 1 a 5:</legend>
+      <div class="mb-4">
+        <label for="nota-joao" class="block text-yellow-300 mb-1">João (Caixa):</label>
+        <input type="number" id="nota-joao" name="notaJoao" min="1" max="5" required aria-required="true" />
+        <div class="explicacao-funcionario" style="display:none;">
+          <label for="explicacao-joao" class="block text-sm mt-1 text-yellow-300">Por que nota baixa para o João?</label>
+          <textarea id="explicacao-joao" name="explicacaoJoao" rows="2" placeholder="Explique aqui..."></textarea>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label for="nota-maria" class="block text-yellow-300 mb-1">Maria (Padaria):</label>
+        <input type="number" id="nota-maria" name="notaMaria" min="1" max="5" required aria-required="true" />
+        <div class="explicacao-funcionario" style="display:none;">
+          <label for="explicacao-maria" class="block text-sm mt-1 text-yellow-300">Por que nota baixa para a Maria?</label>
+          <textarea id="explicacao-maria" name="explicacaoMaria" rows="2" placeholder="Explique aqui..."></textarea>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label for="nota-thais" class="block text-yellow-300 mb-1">Thais (Caixa):</label>
+        <input type="number" id="nota-thais" name="notaThais" min="1" max="5" required aria-required="true" />
+        <div class="explicacao-funcionario" style="display:none;">
+          <label for="explicacao-thais" class="block text-sm mt-1 text-yellow-300">Por que nota baixa para a Thais?</label>
+          <textarea id="explicacao-thais" name="explicacaoThais" rows="2" placeholder="Explique aqui..."></textarea>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label for="nota-eduarda" class="block text-yellow-300 mb-1">Maria Eduarda (Padaria):</label>
+        <input type="number" id="nota-eduarda" name="notaEduarda" min="1" max="5" required aria-required="true" />
+        <div class="explicacao-funcionario" style="display:none;">
+          <label for="explicacao-eduarda" class="block text-sm mt-1 text-yellow-300">Por que nota baixa para a Maria Eduarda?</label>
+          <textarea id="explicacao-eduarda" name="explicacaoEduarda" rows="2" placeholder="Explique aqui..."></textarea>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label for="nota-renata" class="block text-yellow-300 mb-1">Renata (Dona):</label>
+        <input type="number" id="nota-renata" name="notaRenata" min="1" max="5" required aria-required="true" />
+        <div class="explicacao-funcionario" style="display:none;">
+          <label for="explicacao-renata" class="block text-sm mt-1 text-yellow-300">Por que nota baixa para a Renata?</label>
+          <textarea id="explicacao-renata" name="explicacaoRenata" rows="2" placeholder="Explique aqui..."></textarea>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label for="nota-toni" class="block text-yellow-300 mb-1">Toni (Dono):</label>
+        <input type="number" id="nota-toni" name="notaToni" min="1" max="5" required aria-required="true" />
+        <div class="explicacao-funcionario" style="display:none;">
+          <label for="explicacao-toni" class="block text-sm mt-1 text-yellow-300">Por que nota baixa para o Toni?</label>
+          <textarea id="explicacao-toni" name="explicacaoToni" rows="2" placeholder="Explique aqui..."></textarea>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Etapa 3 - Comentários Gerais -->
+    <fieldset class="step" aria-live="polite" aria-label="Comentários gerais" style="display:none;">
+      <legend class="text-lg font-semibold text-yellow-400 mb-2">3. Conte pra gente o que achou do mercado (atendimento, limpeza, organização etc.)</legend>
+      <textarea id="comentario" name="comentario" rows="5" placeholder="Escreva aqui..." required aria-required="true"></textarea>
+    </fieldset>
+
+    <!-- Etapa 4 - Produtos Desejados -->
+    <fieldset class="step" aria-live="polite" aria-label="Produtos desejados" style="display:none;">
+      <legend class="text-lg font-semibold text-yellow-400 mb-2">4. Que produtos você gostaria que tivessem no Bom Mercado?</legend>
+      <textarea id="produtos-desejados" name="produtosDesejados" rows="4" placeholder="Liste aqui..." required aria-required="true"></textarea>
+    </fieldset>
+
+    <!-- Etapa 5 - Sugestões de melhoria -->
+    <fieldset class="step" aria-live="polite" aria-label="Sugestões de melhoria" style="display:none;">
+      <legend class="text-lg font-semibold text-yellow-400 mb-2">5. O que podemos melhorar para tornar o Bom Mercado ainda melhor?</legend>
+      <textarea id="sugestoes-melhoria" name="sugestoesMelhoria" rows="4" placeholder="Conte para nós..." required aria-required="true"></textarea>
+    </fieldset>
+
+    <!-- Etapa Final - Agradecimento -->
+    <fieldset class="step" aria-live="polite" aria-label="Agradecimento" style="display:none; text-align:center;">
+      <h2 class="text-yellow-400 text-2xl font-bold mb-4">Obrigado pela sua avaliação! 🙏</h2>
+      <p>Sua opinião é muito importante para nós e nos ajuda a melhorar cada vez mais o Bom Mercado.</p>
+      <button type="button" id="btn-nova-avaliacao" class="mt-6 px-6 py-3">Fazer outra avaliação</button>
+    </fieldset>
+
+    <div class="flex justify-between mt-6">
+      <button type="button" id="btn-voltar" class="bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-yellow-500" disabled>Voltar</button>
+      <button type="button" id="btn-proximo" class="bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-yellow-500">Próximo</button>
+      <button type="submit" id="btn-enviar" class="bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-yellow-500 hidden">Enviar</button>
+    </div>
+  </form>
+</div>
+
+<!-- Painel admin -->
+<div id="painel-admin" class="max-w-3xl mx-auto mt-12 px-4 hidden text-white">
+  <h2 class="text-yellow-400 text-3xl font-extrabold mb-6 text-center">Painel Administrativo</h2>
+  <div id="conteudo-admin" class="bg-black bg-opacity-70 rounded-xl p-6 shadow-lg"></div>
+</div>
+
+<!-- Scripts -->
+<script>
+  // Firebase setup
+  const firebaseConfig = {
+    databaseURL: "https://site-46fb6-default-rtdb.firebaseio.com/"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // Controle de passos do formulário
+  const steps = document.querySelectorAll('.step');
+  const btnVoltar = document.getElementById('btn-voltar');
+  const btnProximo = document.getElementById('btn-proximo');
+  const btnEnviar = document.getElementById('btn-enviar');
+  const btnNovaAvaliacao = document.getElementById('btn-nova-avaliacao');
+  const barraProgresso = document.getElementById('barra-progresso');
+
+  let currentStep = 0;
+
+  function updateProgressBar() {
+    const percent = ((currentStep) / (steps.length - 1)) * 100;
+    barraProgresso.style.width = percent + '%';
+    barraProgresso.parentElement.setAttribute('aria-valuenow', percent.toFixed(0));
+  }
+
+  function mostrarPasso(index) {
+    steps.forEach((step, i) => {
+      step.style.display = i === index ? 'block' : 'none';
+    });
+    btnVoltar.disabled = index === 0;
+    btnProximo.style.display = (index === steps.length - 2) ? 'none' : 'inline-block';
+    btnEnviar.style.display = (index === steps.length - 2) ? 'inline-block' : 'none';
+    updateProgressBar();
+  }
+
+  btnProximo.addEventListener('click', () => {
+    // valida o campo obrigatório do passo atual
+    const stepAtual = steps[currentStep];
+    const inputsObrigatorios = stepAtual.querySelectorAll('[required]');
+    for (const input of inputsObrigatorios) {
+      if (!input.value) {
+        input.focus();
+        return;
+      }
+    }
+    // check se nota baixa, mostrar textarea explicacao
+    if (currentStep === 0) {
+      const notaMercado = Number(document.getElementById('nota-mercado').value);
+      const expContainer = document.querySelector('.explanation-container');
+      expContainer.style.display = (notaMercado <= 2) ? 'block' : 'none';
+      if (notaMercado <= 2) {
+        const explicacao = document.getElementById('explicacao-nota-mercado').value.trim();
+        if (!explicacao) {
+          alert('Por favor, explique o motivo da nota baixa.');
+          document.getElementById('explicacao-nota-mercado').focus();
+          return;
+        }
+      }
+    }
+    // para avaliação dos funcionários, verifica notas baixas e mostra explicação
+    if (currentStep === 1) {
+      const funcs = ['joao', 'maria', 'thais', 'eduarda', 'renata', 'toni'];
+      for (const f of funcs) {
+        const nota = Number(document.getElementById('nota-' + f).value);
+        const explicacaoElem = document.getElementById('explicacao-' + f);
+        const contExp = explicacaoElem.parentElement;
+        contExp.style.display = (nota <= 2) ? 'block' : 'none';
+        if (nota <= 2 && explicacaoElem.value.trim() === '') {
+          alert(`Por favor, explique o motivo da nota baixa para ${f.charAt(0).toUpperCase() + f.slice(1)}.`);
+          explicacaoElem.focus();
+          return;
+        }
+      }
+    }
+
+    currentStep++;
+    mostrarPasso(currentStep);
+  });
+
+  btnVoltar.addEventListener('click', () => {
+    if (currentStep > 0) {
+      currentStep--;
+      mostrarPasso(currentStep);
+    }
+  });
+
+  btnNovaAvaliacao.addEventListener('click', () => {
+    currentStep = 0;
+    mostrarPasso(currentStep);
+    document.getElementById('form-avaliacao').reset();
+    // esconder todas explicações
+    document.querySelector('.explanation-container').style.display = 'none';
+    document.querySelectorAll('.explicacao-funcionario').forEach(e => e.style.display = 'none');
+    document.getElementById('painel-admin').classList.add('hidden');
+  });
+
+  mostrarPasso(currentStep);
+
+  // Enviar dados para o Firebase
+  document.getElementById('form-avaliacao').addEventListener('submit', e => {
+    e.preventDefault();
+
+    const dados = {
+      notaMercado: Number(document.getElementById('nota-mercado').value),
+      explicacaoNotaMercado: document.getElementById('explicacao-nota-mercado').value.trim() || null,
+      funcionarios: {
+        joao: Number(document.getElementById('nota-joao').value),
+        explicacaoJoao: document.getElementById('explicacao-joao').value.trim() || null,
+        maria: Number(document.getElementById('nota-maria').value),
+        explicacaoMaria: document.getElementById('explicacao-maria').value.trim() || null,
+        thais: Number(document.getElementById('nota-thais').value),
+        explicacaoThais: document.getElementById('explicacao-thais').value.trim() || null,
+        eduarda: Number(document.getElementById('nota-eduarda').value),
+        explicacaoEduarda: document.getElementById('explicacao-eduarda').value.trim() || null,
+        renata: Number(document.getElementById('nota-renata').value),
+        explicacaoRenata: document.getElementById('explicacao-renata').value.trim() || null,
+        toni: Number(document.getElementById('nota-toni').value),
+        explicacaoToni: document.getElementById('explicacao-toni').value.trim() || null,
+      },
+      comentarioGeral: document.getElementById('comentario').value.trim(),
+      produtosDesejados: document.getElementById('produtos-desejados').value.trim(),
+      sugestoesMelhoria: document.getElementById('sugestoes-melhoria').value.trim(),
+      dataHora: new Date().toISOString()
+    };
+
+    // Salvar no Firebase
+    db.ref('avaliacoes').push(dados).then(() => {
+      currentStep++;
+      mostrarPasso(currentStep);
+      // resetar form e esconder explicações
+      document.getElementById('form-avaliacao').reset();
+      document.querySelector('.explanation-container').style.display = 'none';
+      document.querySelectorAll('.explicacao-funcionario').forEach(e => e.style.display = 'none');
+    }).catch(() => {
+      alert('Erro ao enviar avaliação, tente novamente.');
+    });
+  });
+
+  // Login admin disfarçado
+  const botaoLogin = document.getElementById('botao-login');
+  const modalLogin = document.getElementById('modal-login');
+  const btnLoginAdmin = document.getElementById('btn-login-admin');
+  const senhaInput = document.getElementById('senha-admin');
+  const loginError = document.getElementById('login-error');
+  const painelAdmin = document.getElementById('painel-admin');
+  const conteudoAdmin = document.getElementById('conteudo-admin');
+
+  botaoLogin.addEventListener('click', () => {
+    modalLogin.classList.add('active');
+    senhaInput.value = '';
+    loginError.style.display = 'none';
+    senhaInput.focus();
+  });
+
+  btnLoginAdmin.addEventListener('click', () => {
+    if (senhaInput.value === 'admin123') {
+      modalLogin.classList.remove('active');
+      carregarPainelAdmin();
+      painelAdmin.classList.remove('hidden');
+      window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+    } else {
+      loginError.style.display = 'block';
+    }
+  });
+
+  // Carregar painel administrativo
+  function carregarPainelAdmin() {
+    db.ref('avaliacoes').once('value', snapshot => {
+      const avaliacoes = snapshot.val();
+      if (!avaliacoes) {
+        conteudoAdmin.innerHTML = '<p>Nenhuma avaliação encontrada.</p>';
+        return;
+      }
+
+      // Calcula média geral
+      let somaNotasMercado = 0;
+      let totalAvaliacoes = 0;
+
+      const funcionarios = {
+        joao: [],
+        maria: [],
+        thais: [],
+        eduarda: [],
+        renata: [],
+        toni: []
+      };
+
+      const produtosSugeridos = [];
+      const melhoriasSugeridas = [];
+
+      for (const key in avaliacoes) {
+        const a = avaliacoes[key];
+        somaNotasMercado += a.notaMercado;
+        totalAvaliacoes++;
+
+        // Acumular notas dos funcionários
+        for (const f in funcionarios) {
+          if (a.funcionarios[f]) funcionarios[f].push(a.funcionarios[f]);
+        }
+
+        // Produtos e melhorias
+        if (a.produtosDesejados && a.produtosDesejados.length > 0) produtosSugeridos.push(a.produtosDesejados);
+        if (a.sugestoesMelhoria && a.sugestoesMelhoria.length > 0) melhoriasSugeridas.push(a.sugestoesMelhoria);
+      }
+
+      const mediaMercado = (somaNotasMercado / totalAvaliacoes).toFixed(2);
+
+      // Calcular média dos funcionários
+      let html = `<p class="mb-4 text-yellow-400 font-semibold text-lg">Média geral do mercado: <span class="text-white">${mediaMercado}</span> (${totalAvaliacoes} avaliações)</p>`;
+
+      html += '<h3 class="text-yellow-400 font-bold mb-2 text-xl">Ranking dos Funcionários:</h3><ul class="mb-6">';
+      for (const f in funcionarios) {
+        const notas = funcionarios[f];
+        const media = notas.length > 0 ? (notas.reduce((a,b) => a+b, 0)/notas.length).toFixed(2) : 'Sem avaliações';
+        html += `<li><strong>${f.charAt(0).toUpperCase() + f.slice(1)}</strong>: <span class="text-white">${media}</span> estrelas</li>`;
+      }
+      html += '</ul>';
+
+      html += '<h3 class="text-yellow-400 font-bold mb-2 text-xl">Produtos mais sugeridos:</h3><ul class="list-disc pl-6 mb-6">';
+      for (const p of produtosSugeridos) {
+        html += `<li>${p}</li>`;
+      }
+      html += '</ul>';
+
+      html += '<h3 class="text-yellow-400 font-bold mb-2 text-xl">Sugestões de melhoria:</h3><ul class="list-disc pl-6 mb-6">';
+      for (const m of melhoriasSugeridas) {
+        html += `<li>${m}</li>`;
+      }
+      html += '</ul>';
+
+      conteudoAdmin.innerHTML = html;
+    });
+  }
+</script>
+
+</body>
+</html>
