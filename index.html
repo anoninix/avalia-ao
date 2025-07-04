@@ -2,39 +2,36 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Impressora Inteligente | Bom Mercado</title>
+  <title>Etiqueta - Impressão Automática</title>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
     * {
       box-sizing: border-box;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: Arial, sans-serif;
     }
 
     body {
       margin: 0;
-      background: linear-gradient(135deg, #121212, #1e1e1e);
-      color: white;
+      padding: 20px;
+      background: #fff;
+      color: #000;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 30px 20px;
-      min-height: 100vh;
     }
 
     h1 {
-      font-size: 28px;
-      color: #FFD700;
-      margin-bottom: 30px;
-      text-shadow: 0 0 10px #FFD70055;
+      font-size: 22px;
+      margin-bottom: 20px;
+      text-align: center;
     }
 
     .menu, .form-container, .print-wait {
       display: none;
       width: 100%;
-      max-width: 420px;
+      max-width: 400px;
     }
 
     .menu {
@@ -45,69 +42,49 @@
 
     .menu button {
       padding: 15px;
-      font-size: 18px;
-      background: #FFD700;
-      color: #000;
+      font-size: 16px;
+      background: black;
+      color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: transform 0.2s ease;
-      font-weight: bold;
-      box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
-    }
-
-    .menu button:hover {
-      transform: scale(1.05);
     }
 
     .form-container {
-      background: #1a1a1a;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
+      background: #f7f7f7;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
 
     .form-container label {
-      font-weight: bold;
       display: block;
-      margin-top: 15px;
-      color: #FFD700;
+      margin-top: 10px;
+      font-weight: bold;
     }
 
     .form-container input {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
+      margin-top: 4px;
       font-size: 16px;
-      border: none;
-      border-radius: 6px;
-      margin-top: 5px;
-      background: #333;
-      color: white;
     }
 
     .form-container button {
       width: 100%;
-      margin-top: 25px;
-      padding: 14px;
-      background: #FFD700;
-      color: #000;
-      font-size: 18px;
+      margin-top: 20px;
+      padding: 12px;
+      font-size: 16px;
+      background: black;
+      color: white;
       border: none;
-      border-radius: 10px;
-      font-weight: bold;
+      border-radius: 6px;
       cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-
-    .form-container button:hover {
-      transform: scale(1.05);
     }
 
     .print-wait h2 {
       text-align: center;
-      margin-top: 50px;
-      font-size: 20px;
-      color: #ccc;
+      margin-top: 40px;
     }
 
     .print-area {
@@ -129,20 +106,23 @@
         background: white;
         padding: 6mm;
         font-family: Arial, sans-serif;
+        page-break-after: avoid;
       }
 
       .etiqueta {
         width: 100%;
         height: 100%;
-        border: 2px solid black;
+        border: 3px solid black;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        padding: 0;
       }
 
       .produto {
         font-size: 28px;
         font-weight: bold;
+        text-transform: uppercase;
       }
 
       .gramagem {
@@ -154,13 +134,16 @@
         font-weight: bold;
         text-align: right;
         border-top: 1px dashed black;
-        padding-top: 5px;
+        margin-top: auto;
+        padding-top: 4px;
       }
 
       .agradecimento {
         font-size: 14px;
         text-align: center;
+        margin-top: 5px;
         font-style: italic;
+        color: #000;
       }
 
       @page {
@@ -172,28 +155,28 @@
 </head>
 <body>
 
-  <h1>Bom Mercado - Impressão Inteligente</h1>
+  <h1>Sistema de Etiquetas - Bom Mercado</h1>
 
   <div class="menu" id="menu">
-    <button onclick="abrirModoCelular()">📱 Preencher via Celular</button>
-    <button onclick="abrirModoPC()">🖨️ Imprimir no PC</button>
+    <button onclick="abrirModoCelular()">📱 Preencher no Celular</button>
+    <button onclick="abrirModoPC()">🖨️ Modo Impressão PC</button>
   </div>
 
   <div class="form-container" id="formulario">
     <label>Produto:</label>
-    <input type="text" id="produto" placeholder="Ex: Leite Integral" />
+    <input type="text" id="produto" placeholder="Ex: Arroz Tipo 1" />
 
     <label>Gramagem:</label>
-    <input type="text" id="gramagem" placeholder="Ex: 1L" />
+    <input type="text" id="gramagem" placeholder="Ex: 5kg" />
 
     <label>Valor:</label>
-    <input type="text" id="valor" placeholder="Ex: R$ 4,99" />
+    <input type="text" id="valor" placeholder="Ex: R$ 19,90" />
 
-    <button onclick="enviarFirebase()">Enviar Etiqueta</button>
+    <button onclick="enviarFirebase()">Enviar para Impressão</button>
   </div>
 
   <div class="print-wait" id="printWait">
-    <h2>⏳ Aguardando dados do celular...</h2>
+    <h2>Aguardando etiqueta enviada pelo celular...</h2>
   </div>
 
   <div class="print-area" id="printArea">
@@ -206,6 +189,7 @@
   </div>
 
   <script>
+    // Firebase Config
     const firebaseConfig = {
       databaseURL: "https://site-46fb6-default-rtdb.firebaseio.com/"
     };
@@ -213,30 +197,28 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // Mostrar menu
     document.getElementById("menu").style.display = "flex";
 
     function abrirModoCelular() {
       document.getElementById("menu").style.display = "none";
       document.getElementById("formulario").style.display = "block";
-      console.log("Modo celular ativado");
+      console.log("Modo celular ativo");
     }
 
     function abrirModoPC() {
       document.getElementById("menu").style.display = "none";
       document.getElementById("printWait").style.display = "block";
       document.getElementById("printArea").style.display = "block";
-      console.log("Modo impressão ativado");
 
       db.ref("etiquetaAtual").on("value", snapshot => {
         const data = snapshot.val();
-        if (data) {
+        if (data && data.produto && data.gramagem && data.preco) {
           document.getElementById("etqProduto").textContent = data.produto;
           document.getElementById("etqGramagem").textContent = data.gramagem;
           document.getElementById("etqPreco").textContent = data.preco;
-          console.log("Nova etiqueta recebida:", data);
-          setTimeout(() => {
-            window.print();
-          }, 300);
+          console.log("Etiqueta recebida:", data);
+          setTimeout(() => window.print(), 300); // Imprime automaticamente
         }
       });
     }
@@ -247,7 +229,7 @@
       const valor = document.getElementById("valor").value.trim();
 
       if (!produto || !gramagem || !valor) {
-        alert("Preencha todos os campos corretamente!");
+        alert("Preencha todos os campos!");
         return;
       }
 
@@ -257,8 +239,7 @@
         preco: valor,
         timestamp: Date.now()
       }).then(() => {
-        alert("Etiqueta enviada com sucesso!");
-        console.log("Etiqueta salva no Firebase:", { produto, gramagem, valor });
+        alert("Etiqueta enviada!");
         document.getElementById("produto").value = "";
         document.getElementById("gramagem").value = "";
         document.getElementById("valor").value = "";
